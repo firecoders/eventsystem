@@ -37,11 +37,7 @@ namespace engine
                 public:
                     Index_node ();
 
-                    // get_descendant is not const, because it creates and attaches
-                    // a new Index_node if it doesn't already exist
-                    Index_node < Wrapped, Key >& get_descendant ( std::vector < Key > keys );
-                    template < typename Iterator >
-                    Index_node < Wrapped, Key >& get_descendant ( Iterator keys_begin, Iterator keys_end );
+                    Index_node < Wrapped, Key >& operator[] ( Key key );
 
                     std::shared_ptr < Wrapped > get_wrapped () const;
                     void set_wrapped ( std::shared_ptr < Wrapped > wrapped );
@@ -60,26 +56,19 @@ namespace engine
             {}
 
         template < typename Wrapped, typename Key >
-            Index_node < Wrapped, Key >& Index_node < Wrapped, Key >::get_descendant ( std::vector < Key > keys )
+            Index_node < Wrapped, Key >& Index_node < Wrapped, Key >::operator[] ( Key key )
             {
-                return get_descendant ( keys.begin (), keys.end () );
-            }
-
-        template < typename Wrapped, typename Key >
-        template < typename Iterator >
-            Index_node < Wrapped, Key >& Index_node < Wrapped, Key >::get_descendant ( Iterator keys_begin, Iterator keys_end )
-            {
-                if ( keys_begin == keys_end )
-                {
-                    return *this;
-                }
-                auto iterator = children.find ( *keys_begin );
+                auto iterator = children.find ( key );
                 if ( iterator == children.end () )
                 {
-                    children.insert ( { *keys_begin, std::make_shared < Index_node < Wrapped, Key > > () } );
+                    auto node = std::make_shared < Index_node < Wrapped, Key > > ();
+                    children.insert ( { key, node } );
+                    return * node;
                 }
-                auto other = children.at ( *keys_begin );
-                return other->get_descendant ( ++keys_begin, keys_end );
+                else
+                {
+                    return * iterator->second;
+                }
             }
 
         template < typename Wrapped, typename Key >
