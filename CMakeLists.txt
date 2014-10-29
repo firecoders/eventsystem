@@ -20,8 +20,7 @@ set ( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O1" )
 # Include headers from inc
 include_directories ( ${CMAKE_SOURCE_DIR}/inc )
 
-# Add the two subdirectories
-add_subdirectory ( ${CMAKE_SOURCE_DIR}/src )
+# Add the test subdirectory
 add_subdirectory ( ${CMAKE_SOURCE_DIR}/tests )
 
 file ( GLOB_RECURSE EVENTSYSTEM_HEADERS ${CMAKE_SOURCE_DIR}/inc *.(h|hpp) )

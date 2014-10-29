@@ -22,7 +22,6 @@
 #include <gtest/gtest.h>
 
 #include "engine/types/Index_node.hpp"
-#include "engine/types/Dict.h"
 
 #include <memory>
 #include <iostream>
@@ -43,7 +42,7 @@ TEST ( engineTypesIndexNode, wrappedStorage )
 TEST ( engineTypesIndexNode, absentCreation )
 {
     Index_node < int > base;
-    EXPECT_EQ ( nullptr, base.get_descendant ( { { false } } ).get_wrapped () );
+    EXPECT_EQ ( nullptr, base [ "hello" ].get_wrapped () );
 }
 
 TEST ( engineTypesIndexNode, defaultKey )
@@ -54,9 +53,9 @@ TEST ( engineTypesIndexNode, defaultKey )
 
 TEST ( engineTypesIndexNode, numbersExample )
 {
-    Index_node < int, Dict_element > base;
-    base.get_descendant ( { { std::string ( "odd" ) }, { 5 } } ).set_wrapped ( std::make_shared < int > ( 5 ) );
-    base.get_descendant ( { { std::string ( "even" ) }, { 2 } } ).set_wrapped ( std::make_shared < int > ( 2 ) );
-    EXPECT_EQ ( 5, * ( base.get_descendant ( { { std::string ( "odd" ) },  { 5 } } ).get_wrapped () ) );
-    EXPECT_EQ ( 2, * ( base.get_descendant ( { { std::string ( "even" ) } } ).get_descendant ( { { 2 } } ).get_wrapped () ) );
+    Index_node < int > base;
+    base [ "odd" ] [ "five" ].set_wrapped ( std::make_shared < int > ( 5 ) );
+    base [ "even" ] [ "two" ].set_wrapped ( std::make_shared < int > ( 2 ) );
+    EXPECT_EQ ( 5, * ( base [ "odd" ] [ "five" ].get_wrapped () ) );
+    EXPECT_EQ ( 2, * ( base [ "even" ] [ "two" ].get_wrapped () ) );
 }
