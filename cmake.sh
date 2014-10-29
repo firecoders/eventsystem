@@ -5,10 +5,10 @@ set -e
 
 case $1 in
     "setup")
-        cmake -H. -Bbuild
+        cmake -H. -Bbuild -DCOMPILE_TESTS=ON
         ;;
     "debug")
-        cmake -H. -Bbuild -DCMAKE_BUILD_TYPE=Debug
+        cmake -H. -Bbuild -DCOMPILE_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
         ;;
     "clean")
         echo "removing build/, libeventsystem.a and test_executable"
