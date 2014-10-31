@@ -25,6 +25,7 @@
 #include <memory>
 
 #include "interfaces/Receiver.h"
+#include "interfaces/Forwarder.h"
 #include "Broadcaster.hpp"
 
 namespace engine
@@ -32,7 +33,7 @@ namespace engine
     namespace events
     {
         template < typename Event_type >
-            class Receiver_forwarder : public Receiver < Event_type >
+            class Receiver_forwarder : public Forwarder < Event_type >
             {
                 public:
                     Receiver_forwarder ( std::shared_ptr < Receiver < Event_type > > target );
