@@ -40,6 +40,10 @@ namespace engine
                     Index_node < Wrapped, Key >& operator[] ( Key key );
                     std::shared_ptr < Index_node < Wrapped, Key > > at ( Key key );
 
+                    std::shared_ptr < Index_node < Wrapped, Key > > get_descendant ( std::vector < Key > keys );
+                    template < typename Iterator >
+                    std::shared_ptr < Index_node < Wrapped, Key > > get_descendant ( Iterator keys_begin, Iterator keys_end );
+
                     std::shared_ptr < Wrapped > get_wrapped () const;
                     void set_wrapped ( std::shared_ptr < Wrapped > wrapped );
 
@@ -75,6 +79,28 @@ namespace engine
                 else
                 {
                     return iterator->second;
+                }
+            }
+
+        template < typename Wrapped, typename Key >
+            std::shared_ptr < Index_node < Wrapped, Key > > Index_node < Wrapped, Key >::get_descendant ( std::vector < Key > keys )
+            {
+                return get_descendant ( keys.begin (), keys.end () );
+            }
+
+        template < typename Wrapped, typename Key >
+        template < typename Iterator >
+            std::shared_ptr < Index_node < Wrapped, Key > > Index_node < Wrapped, Key >::get_descendant ( Iterator keys_begin, Iterator keys_end )
+            {
+                Key key = * keys_begin;
+                auto child = at ( key );
+                if ( ++keys_begin == keys_end )
+                {
+                    return child;
+                }
+                else
+                {
+                    return child->get_descendant ( keys_begin, keys_end );
                 }
             }
 
