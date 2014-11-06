@@ -22,6 +22,7 @@
 #ifndef ENGINE_TYPES_DYNAMIC_UNION_GUARD
 #define ENGINE_TYPES_DYNAMIC_UNION_GUARD
 
+#include <stdexcept>
 #include <memory>
 #include <string>
 #include <functional>
