@@ -38,6 +38,7 @@ namespace engine
                     Index_node ();
 
                     Index_node < Wrapped, Key >& operator[] ( Key key );
+                    std::shared_ptr < Index_node < Wrapped, Key > > at ( Key key );
 
                     std::shared_ptr < Wrapped > get_wrapped () const;
                     void set_wrapped ( std::shared_ptr < Wrapped > wrapped );
@@ -58,16 +59,22 @@ namespace engine
         template < typename Wrapped, typename Key >
             Index_node < Wrapped, Key >& Index_node < Wrapped, Key >::operator[] ( Key key )
             {
+                return * at ( key );
+            }
+
+        template < typename Wrapped, typename Key >
+            std::shared_ptr < Index_node < Wrapped, Key > > Index_node < Wrapped, Key >::at ( Key key )
+            {
                 auto iterator = children.find ( key );
                 if ( iterator == children.end () )
                 {
                     auto node = std::make_shared < Index_node < Wrapped, Key > > ();
                     children.insert ( { key, node } );
-                    return * node;
+                    return node;
                 }
                 else
                 {
-                    return * iterator->second;
+                    return iterator->second;
                 }
             }
 
