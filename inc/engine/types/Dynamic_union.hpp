@@ -66,12 +66,12 @@ namespace engine
             operator_less ( Compare_function ( Type_description < T >::operator_less ) )
         {}
 
-        std::string Dynamic_union::get_type () const
+        inline std::string Dynamic_union::get_type () const
         {
             return type;
         }
 
-        bool Dynamic_union::operator== ( const Dynamic_union& other ) const
+        inline bool Dynamic_union::operator== ( const Dynamic_union& other ) const
         {
             if ( get_type () != other.get_type () )
             {
@@ -80,7 +80,7 @@ namespace engine
             return operator_equals ( *this, other );
         }
 
-        bool Dynamic_union::operator< ( const Dynamic_union& other ) const
+        inline bool Dynamic_union::operator< ( const Dynamic_union& other ) const
         {
             if ( get_type () != other.get_type () )
             {
@@ -96,7 +96,7 @@ namespace engine
             return * ( ( T* ) value.get () );
         }
 
-        void Dynamic_union::check_type ( std::string type ) const
+        inline void Dynamic_union::check_type ( std::string type ) const
         {
              if ( get_type () != type )
              {
