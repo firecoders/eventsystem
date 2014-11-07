@@ -59,3 +59,19 @@ TEST ( engineTypesIndexNode, numbersExample )
     EXPECT_EQ ( 5, * ( base [ "odd" ] [ "five" ].get_wrapped () ) );
     EXPECT_EQ ( 2, * ( base [ "even" ] [ "two" ].get_wrapped () ) );
 }
+
+TEST ( engineTypesIndexNode, sharedPtrsNumbersExample )
+{
+    std::shared_ptr < Index_node < int > > base = std::make_shared < Index_node < int > > ();
+    base->at ( "odd" )->at ( "five" )->set_wrapped ( std::make_shared < int > ( 5 ) );
+    base->at ( "even" )->at ( "two" )->set_wrapped ( std::make_shared < int > ( 2 ) );
+    EXPECT_EQ ( 5, * ( base->at ( "odd" )->at ( "five" )->get_wrapped () ) );
+    EXPECT_EQ ( 2, * ( base->at ( "even" )->at ( "two" )->get_wrapped () ) );
+}
+
+TEST ( engineTypesIndexNode, getDescendant )
+{
+    std::shared_ptr < Index_node < int > > base = std::make_shared < Index_node < int > > ();
+    base->get_descendant ( { "some", "deeply", "nested", "index", "node" } )->set_wrapped ( std::make_shared < int > ( 42 ) );
+    EXPECT_EQ ( 42, * ( ( * base ) [ "some" ] [ "deeply" ] [ "nested" ] [ "index" ] [ "node" ].get_wrapped () ) );
+}
