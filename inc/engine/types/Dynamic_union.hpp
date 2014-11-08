@@ -32,13 +32,13 @@ namespace engine
     namespace types
     {
         template < typename T >
-        struct Type_description {};
+            struct Type_description {};
 
         class Dynamic_union
         {
             public:
                 template < typename T >
-                Dynamic_union ( T value );
+                    Dynamic_union ( T value );
 
                 Dynamic_union () {};
 
@@ -47,7 +47,7 @@ namespace engine
                 bool operator< ( const Dynamic_union& other ) const;
 
                 template < typename T >
-                T get () const;
+                    T get () const;
 
             private:
                 typedef std::function < bool ( const Dynamic_union&, const Dynamic_union& ) > Compare_function;
@@ -61,12 +61,12 @@ namespace engine
         };
 
         template < typename T >
-        Dynamic_union::Dynamic_union ( T val ) :
-            type ( Type_description < T >::type_string ),
-            value ( std::make_shared < T > ( val ) ),
-            operator_equals ( Compare_function ( Type_description < T >::operator_equals ) ),
-            operator_less ( Compare_function ( Type_description < T >::operator_less ) )
-        {}
+            Dynamic_union::Dynamic_union ( T val ) :
+                type ( Type_description < T >::type_string ),
+                value ( std::make_shared < T > ( val ) ),
+                operator_equals ( Compare_function ( Type_description < T >::operator_equals ) ),
+                operator_less ( Compare_function ( Type_description < T >::operator_less ) )
+            {}
 
         inline std::string Dynamic_union::get_type () const
         {
@@ -92,11 +92,11 @@ namespace engine
         }
 
         template < typename T >
-        T Dynamic_union::get () const
-        {
-            check_type ( Type_description < T >::type_string );
-            return * ( ( T* ) value.get () );
-        }
+            T Dynamic_union::get () const
+            {
+                check_type ( Type_description < T >::type_string );
+                return * ( ( T* ) value.get () );
+            }
 
         inline void Dynamic_union::check_type ( std::string type ) const
         {
