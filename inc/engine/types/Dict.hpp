@@ -22,16 +22,76 @@
 #ifndef ENGINE_TYPES_DICT_GUARD
 #define ENGINE_TYPES_DICT_GUARD
 
+#include <string>
+#include <memory>
 #include <map>
 
 #include "engine/types/Dynamic_union.hpp"
-#include "engine/types/Type_descriptions.hpp"
 
 namespace engine
 {
     namespace types
     {
-        typedef std::map < std::string, Dynamic_union > Dict;
+        template < typename T >
+            struct Dict_types {};
+
+        typedef std::map < std::string, Dynamic_union < Dict_types > > Dict;
+
+        template <>
+            struct Dict_types < bool >
+            {
+                static constexpr const char* type_string = "bool";
+                static bool operator_equals ( const Dynamic_union < Dict_types >& lhs, const Dynamic_union < Dict_types >& rhs )
+                {
+                    return lhs.get < bool > () == rhs.get < bool > ();
+                }
+                static bool operator_less ( const Dynamic_union < Dict_types >& lhs, const Dynamic_union < Dict_types >& rhs )
+                {
+                    return lhs.get < bool > () < rhs.get < bool > ();
+                }
+            };
+
+        template <>
+            struct Dict_types < int >
+            {
+                static constexpr const char* type_string = "int";
+                static bool operator_equals ( const Dynamic_union < Dict_types >& lhs, const Dynamic_union < Dict_types >& rhs )
+                {
+                    return lhs.get < int > () == rhs.get < int > ();
+                }
+                static bool operator_less ( const Dynamic_union < Dict_types >& lhs, const Dynamic_union < Dict_types >& rhs )
+                {
+                    return lhs.get < int > () < rhs.get < int > ();
+                }
+            };
+
+        template <>
+            struct Dict_types < double >
+            {
+                static constexpr const char* type_string = "double";
+                static bool operator_equals ( const Dynamic_union < Dict_types >& lhs, const Dynamic_union < Dict_types >& rhs )
+                {
+                    return lhs.get < double > () == rhs.get < double > ();
+                }
+                static bool operator_less ( const Dynamic_union < Dict_types >& lhs, const Dynamic_union < Dict_types >& rhs )
+                {
+                    return lhs.get < double > () < rhs.get < double > ();
+                }
+            };
+
+        template <>
+            struct Dict_types < std::string >
+            {
+                static constexpr const char* type_string = "std::string";
+                static bool operator_equals ( const Dynamic_union < Dict_types >& lhs, const Dynamic_union < Dict_types >& rhs )
+                {
+                    return lhs.get < std::string > () == rhs.get < std::string > ();
+                }
+                static bool operator_less ( const Dynamic_union < Dict_types >& lhs, const Dynamic_union < Dict_types >& rhs )
+                {
+                    return lhs.get < std::string > () < rhs.get < std::string > ();
+                }
+            };
     } /* namespace types */
 } /* namespace engine */
 

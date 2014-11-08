@@ -33,6 +33,27 @@ using namespace engine::types;
 TEST ( engineTypesDict, type )
 {
     bool dict_is_map_from_string_to_dynamic_union =
-        std::is_same < Dict, std::map < std::string, Dynamic_union > >::value;
+        std::is_same < Dict, std::map < std::string, Dynamic_union < Dict_types > > >::value;
     EXPECT_TRUE ( dict_is_map_from_string_to_dynamic_union );
+}
+
+TEST ( engineTypesDict, predefinedTypes )
+{
+    Dynamic_union < Dict_types > boolean { true };
+    Dynamic_union < Dict_types > integer { 42 };
+    Dynamic_union < Dict_types > doubleFloat { -17.2 };
+    Dynamic_union < Dict_types > string { std::string ( "Hello World!" ) };
+
+    EXPECT_EQ ( "bool",        boolean.get_type () );
+    EXPECT_EQ ( "int",         integer.get_type () );
+    EXPECT_EQ ( "double",      doubleFloat.get_type () );
+    EXPECT_EQ ( "std::string", string.get_type () );
+
+    EXPECT_EQ ( true, boolean.get < bool > () );
+    EXPECT_EQ ( 42, integer.get < int > () );
+    EXPECT_EQ ( -17.2, doubleFloat.get < double > () );
+    EXPECT_EQ ( std::string ( "Hello World!" ), string.get < std::string > () );
+
+    EXPECT_THROW ( boolean.get < int > (), std::logic_error );
+    EXPECT_THROW ( string.get < double > (), std::logic_error );
 }

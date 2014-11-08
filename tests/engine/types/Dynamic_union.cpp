@@ -22,34 +22,13 @@
 #include <gtest/gtest.h>
 
 #include "engine/types/Dynamic_union.hpp"
-#include "engine/types/Type_descriptions.hpp"
 
 #include <string>
 
 using namespace engine::types;
 
-TEST ( engineTypesDynamicUnion, predefinedTypes )
-{
-    Dynamic_union boolean { true };
-    Dynamic_union integer { 42 };
-    Dynamic_union doubleFloat { -17.2 };
-    Dynamic_union string { std::string ( "Hello World!" ) };
-
-    EXPECT_EQ ( "bool",        boolean.get_type () );
-    EXPECT_EQ ( "int",         integer.get_type () );
-    EXPECT_EQ ( "double",      doubleFloat.get_type () );
-    EXPECT_EQ ( "std::string", string.get_type () );
-
-    EXPECT_EQ ( true, boolean.get < bool > () );
-    EXPECT_EQ ( 42, integer.get < int > () );
-    EXPECT_EQ ( -17.2, doubleFloat.get < double > () );
-    EXPECT_EQ ( std::string ( "Hello World!" ), string.get < std::string > () );
-
-    EXPECT_THROW ( boolean.get < int > (), std::logic_error );
-    EXPECT_THROW ( string.get < double > (), std::logic_error );
-}
-
-// user defined types
+template < typename T >
+    struct Type_description {};
 
 struct Wrap_an_int
 {
@@ -64,42 +43,35 @@ struct Wrap_an_int
     }
 };
 
-namespace engine
-{
-    namespace types
+template <>
+    struct Type_description < Wrap_an_int >
     {
-        template <>
-        struct Type_description < Wrap_an_int >
+        static constexpr const char* type_string = "Wrap_an_int";
+        static bool operator_equals ( const Dynamic_union < Type_description >& lhs, const Dynamic_union < Type_description >& rhs )
         {
-            static constexpr const char* type_string = "Wrap_an_int";
-            static bool operator_equals ( const Dynamic_union& lhs, const Dynamic_union& rhs )
-            {
-                return lhs.get < Wrap_an_int > () == rhs.get < Wrap_an_int > ();
-            }
-            static bool operator_less ( const Dynamic_union& lhs, const Dynamic_union& rhs )
-            {
-                return lhs.get < Wrap_an_int > () < rhs.get < Wrap_an_int > ();
-            }
-        };
-    } /* namespace types */
-} /* namespace engine */
+            return lhs.get < Wrap_an_int > () == rhs.get < Wrap_an_int > ();
+        }
+        static bool operator_less ( const Dynamic_union < Type_description >& lhs, const Dynamic_union < Type_description >& rhs )
+        {
+            return lhs.get < Wrap_an_int > () < rhs.get < Wrap_an_int > ();
+        }
+    };
 
-TEST ( engineTypesDynamicUnion, userDefinedTypes )
+TEST ( engineTypesDynamicUnion, exampleType )
 {
-    Dynamic_union wrap_an_int ( Wrap_an_int { 213947 } );
+    Dynamic_union < Type_description > wrap_an_int ( Wrap_an_int { 213947 } );
     EXPECT_EQ ( "Wrap_an_int", wrap_an_int.get_type () );
     EXPECT_EQ ( Wrap_an_int { 213947 }, wrap_an_int.get < Wrap_an_int > () );
 }
 
 TEST ( engineTypesDynamicUnion, operators )
 {
-    Dynamic_union three ( 3 );
-    Dynamic_union four ( 4 );
-    Dynamic_union also_four ( 4 );
-    Dynamic_union false_ ( false );
-    Dynamic_union true_ ( true );
+    Dynamic_union < Type_description > three ( Wrap_an_int { 3 } );
+    Dynamic_union < Type_description > four ( Wrap_an_int { 4 } );
+    Dynamic_union < Type_description > also_four ( Wrap_an_int { 4 } );
     EXPECT_TRUE ( three == three );
-    EXPECT_FALSE ( three == true_ );
     EXPECT_TRUE ( four == also_four );
-    EXPECT_FALSE ( false_ == true_ );
+    EXPECT_TRUE ( three < four );
+    EXPECT_FALSE ( four < also_four );
+    EXPECT_FALSE ( four < three );
 }
