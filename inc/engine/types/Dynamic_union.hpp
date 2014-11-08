@@ -40,6 +40,8 @@ namespace engine
                 template < typename T >
                 Dynamic_union ( T value );
 
+                Dynamic_union () {};
+
                 std::string get_type () const;
                 bool operator== ( const Dynamic_union& other ) const;
                 bool operator< ( const Dynamic_union& other ) const;
