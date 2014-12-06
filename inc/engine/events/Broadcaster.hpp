@@ -48,7 +48,6 @@ namespace engine
 
                 private:
                     void empty_queues ();
-                    void send ( Event_type event );
 
                     std::set < std::shared_ptr < Receiver < Event_type > > > subscribers;
 
@@ -56,20 +55,16 @@ namespace engine
                     // at tests/engine/events/Broadcaster.cpp
                     std::queue < Receiver < Event_type >* > unsubscriber_queue;
                     std::queue < std::shared_ptr < Receiver < Event_type > > > subscriber_queue;
-                    std::queue < Event_type > event_queue;
 
                     bool subscribers_lock;
-                    bool receive_lock;
 
                     std::mutex unsubscribe_mutex;
-                    std::mutex event_queue_mutex;
             };
 
 
         template < typename Event_type >
             Broadcaster < Event_type >::Broadcaster () :
-                subscribers_lock ( false ),
-                receive_lock ( false )
+                subscribers_lock ( false )
             {}
 
         template < typename Event_type >
@@ -87,6 +82,8 @@ namespace engine
                 if ( !subscribers_lock )
                 {
                     std::unique_lock < std::mutex > unsubscribe_lock ( unsubscribe_mutex );
+
+                    // Lambda method to search for unsubscriber in subscribers
                     auto is_unsubscriber = [] ( std::shared_ptr < Receiver < Event_type > > it, Receiver < Event_type >* unsubscriber )
                         { return it.get () == unsubscriber; };
 
@@ -102,34 +99,6 @@ namespace engine
 
         template < typename Event_type >
             void Broadcaster < Event_type >::receive ( Event_type event )
-            {
-                if ( !receive_lock )
-                {
-                    receive_lock = true;
-
-                    send ( event );
-
-                    event_queue_mutex.lock ();
-                    while ( !event_queue.empty () )
-                    {
-                        Event_type e = event_queue.front ();
-                        event_queue.pop ();
-                        event_queue_mutex.unlock ();
-                        send ( e );
-                        event_queue_mutex.lock ();
-                    }
-                    event_queue_mutex.unlock ();
-                    receive_lock = false;
-                }
-                else
-                {
-                    std::unique_lock < std::mutex > event_queue_lock ( event_queue_mutex );
-                    event_queue.push ( event );
-                }
-            }
-
-        template < typename Event_type >
-            void Broadcaster < Event_type >::send ( Event_type event )
             {
                 subscribers_lock = true;
                 for ( auto receiver : subscribers )

@@ -19,52 +19,52 @@
    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
    OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-#ifndef ENGINE_EVENTS_RECEIVER_FORWARDER_GUARD
-#define ENGINE_EVENTS_RECEIVER_FORWARDER_GUARD
+#ifndef ENGINE_EVENTS_DETACHING_FORWARDER_GUARD
+#define ENGINE_EVENTS_DETACHING_FORWARDER_GUARD
 
-#include <memory>
+#include <thread>
+#include <functional>
 
-#include "interfaces/Receiver.h"
 #include "interfaces/Forwarder.h"
-#include "Broadcaster.hpp"
+#include "Receiver_forwarder.hpp"
 
 namespace engine
 {
     namespace events
     {
         template < typename Event_type >
-            class Receiver_forwarder : public Forwarder < Event_type >
+            class Detaching_forwarder : private Forwarder < Event_type >
             {
                 public:
-                    Receiver_forwarder ( std::shared_ptr < Receiver < Event_type > > target );
+                    Detaching_forwarder ( std::shared_ptr < Receiver < Event_type > > target );
 
                     virtual void receive ( Event_type event );
                     void redirect ( std::shared_ptr < Receiver < Event_type > > target );
 
-                    virtual ~Receiver_forwarder () noexcept = default;
+                    virtual ~Detaching_forwarder () noexcept = default;
 
                 private:
-                    std::shared_ptr < Receiver < Event_type > > target;
+                    Receiver_forwarder < Event_type > receiver_forwarder;
             };
 
         template < typename Event_type >
-            Receiver_forwarder < Event_type >::Receiver_forwarder ( std::shared_ptr < Receiver < Event_type > > target ) :
-                target ( target )
+            Detaching_forwarder < Event_type >::Detaching_forwarder ( std::shared_ptr < Receiver < Event_type > > target ) :
+                receiver_forwarder ( target )
             {}
 
         template < typename Event_type >
-            void Receiver_forwarder < Event_type >::receive ( Event_type event )
+            void Detaching_forwarder < Event_type >::receive ( Event_type event )
             {
-                if ( target != nullptr )
-                    target->receive ( event );
+                std::thread t ( std::bind ( &Receiver_forwarder < Event_type >::receive, receiver_forwarder, event ) );
+                t.detach();
             }
 
         template < typename Event_type >
-            void Receiver_forwarder < Event_type >::redirect ( std::shared_ptr < Receiver < Event_type > > target )
+            void Detaching_forwarder < Event_type >::redirect ( std::shared_ptr < Receiver < Event_type > > target )
             {
-                this->target = target;
+                receiver_forwarder.redirect ( target );
             }
     } /* namespace events */
 } /* namespace engine */
 
-#endif // ENGINE_EVENTS_RECEIVER_FORWARDER_GUARD
+#endif // ENGINE_EVENTS_DETACHING_FORWARDER_GUARD

@@ -19,52 +19,52 @@
    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
    OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. */
 
-#ifndef ENGINE_EVENTS_RECEIVER_FORWARDER_GUARD
-#define ENGINE_EVENTS_RECEIVER_FORWARDER_GUARD
+#ifndef ENGINE_EVENTS_BLOCKING_FORWARDER_GUARD
+#define ENGINE_EVENTS_BLOCKING_FORWARDER_GUARD
 
-#include <memory>
+#include <mutex>
 
-#include "interfaces/Receiver.h"
 #include "interfaces/Forwarder.h"
-#include "Broadcaster.hpp"
+#include "Receiver_forwarder.hpp"
 
 namespace engine
 {
     namespace events
     {
         template < typename Event_type >
-            class Receiver_forwarder : public Forwarder < Event_type >
+            class Blocking_forwarder : public Forwarder < Event_type >
             {
                 public:
-                    Receiver_forwarder ( std::shared_ptr < Receiver < Event_type > > target );
+                    Blocking_forwarder ( std::shared_ptr < Receiver < Event_type > > target );
 
                     virtual void receive ( Event_type event );
                     void redirect ( std::shared_ptr < Receiver < Event_type > > target );
 
-                    virtual ~Receiver_forwarder () noexcept = default;
+                    virtual ~Blocking_forwarder () noexcept = default;
 
                 private:
-                    std::shared_ptr < Receiver < Event_type > > target;
+                    std::mutex unique_mutex;
+                    Receiver_forwarder < Event_type > receiver_forwarder;
             };
 
         template < typename Event_type >
-            Receiver_forwarder < Event_type >::Receiver_forwarder ( std::shared_ptr < Receiver < Event_type > > target ) :
-                target ( target )
+            Blocking_forwarder < Event_type >::Blocking_forwarder ( std::shared_ptr < Receiver < Event_type > > target ) :
+                receiver_forwarder ( target )
             {}
 
         template < typename Event_type >
-            void Receiver_forwarder < Event_type >::receive ( Event_type event )
+            void Blocking_forwarder < Event_type >::receive ( Event_type event )
             {
-                if ( target != nullptr )
-                    target->receive ( event );
+                std::unique_lock < std::mutex > lock ( unique_mutex );
+                receiver_forwarder.receive ( event );
             }
 
         template < typename Event_type >
-            void Receiver_forwarder < Event_type >::redirect ( std::shared_ptr < Receiver < Event_type > > target )
+            void Blocking_forwarder < Event_type >::redirect ( std::shared_ptr < Receiver < Event_type > > target )
             {
-                this->target = target;
+                receiver_forwarder.redirect ( target );
             }
     } /* namespace events */
 } /* namespace engine */
 
-#endif // ENGINE_EVENTS_RECEIVER_FORWARDER_GUARD
+#endif // ENGINE_EVENTS_BLOCKING_FORWARDER_GUARD
