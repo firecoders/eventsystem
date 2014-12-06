@@ -31,79 +31,85 @@ namespace engine
 {
     namespace types
     {
-        template < typename T >
-        struct Type_description {};
-
-        class Dynamic_union
-        {
-            public:
-                template < typename T >
-                Dynamic_union ( T value );
-
-                std::string get_type () const;
-                bool operator== ( const Dynamic_union& other ) const;
-                bool operator< ( const Dynamic_union& other ) const;
-
-                template < typename T >
-                T get () const;
-
-            private:
-                typedef std::function < bool ( const Dynamic_union&, const Dynamic_union& ) > Compare_function;
-
-                std::string type;
-                std::shared_ptr < void > value;
-                Compare_function operator_equals;
-                Compare_function operator_less;
-
-                void check_type ( std::string type ) const;
-        };
-
-        template < typename T >
-        Dynamic_union::Dynamic_union ( T val ) :
-            type ( Type_description < T >::type_string ),
-            value ( std::make_shared < T > ( val ) ),
-            operator_equals ( Compare_function ( Type_description < T >::operator_equals ) ),
-            operator_less ( Compare_function ( Type_description < T >::operator_less ) )
-        {}
-
-        inline std::string Dynamic_union::get_type () const
-        {
-            return type;
-        }
-
-        inline bool Dynamic_union::operator== ( const Dynamic_union& other ) const
-        {
-            if ( get_type () != other.get_type () )
+        template < template < typename > class Type_description >
+            class Dynamic_union
             {
-                return false;
-            }
-            return operator_equals ( *this, other );
-        }
+                public:
+                    template < typename T >
+                        Dynamic_union ( T value );
 
-        inline bool Dynamic_union::operator< ( const Dynamic_union& other ) const
-        {
-            if ( get_type () != other.get_type () )
-            {
-                return get_type () < other.get_type ();
-            }
-            return operator_less ( *this, other );
-        }
+                    Dynamic_union () {};
 
+                    std::string get_type () const;
+                    bool operator== ( const Dynamic_union < Type_description >& other ) const;
+                    bool operator< ( const Dynamic_union < Type_description >& other ) const;
+
+                    template < typename T >
+                        T get () const;
+
+                private:
+                    typedef std::function < bool ( const Dynamic_union < Type_description >&, const Dynamic_union < Type_description >& ) > Compare_function;
+
+                    std::string type;
+                    std::shared_ptr < void > value;
+                    Compare_function operator_equals;
+                    Compare_function operator_less;
+
+                    void check_type ( std::string type ) const;
+            };
+
+        template < template < typename > class Type_description >
         template < typename T >
-        T Dynamic_union::get () const
-        {
-            check_type ( Type_description < T >::type_string );
-            return * ( ( T* ) value.get () );
-        }
+            Dynamic_union < Type_description >::Dynamic_union ( T val ) :
+                type ( Type_description < T >::type_string ),
+                value ( std::make_shared < T > ( val ) ),
+                operator_equals ( Compare_function ( Type_description < T >::operator_equals ) ),
+                operator_less ( Compare_function ( Type_description < T >::operator_less ) )
+            {}
 
-        inline void Dynamic_union::check_type ( std::string type ) const
-        {
-             if ( get_type () != type )
-             {
-                 throw std::logic_error ( "Cannot retrieve " + type +
-                         " from a Dynamic_union whose type is " + get_type () + "." );
-             }
-        }
+        template < template < typename > class Type_description >
+            std::string Dynamic_union < Type_description >::get_type () const
+            {
+                return type;
+            }
+
+        template < template < typename > class Type_description >
+            bool Dynamic_union < Type_description >::operator== ( const Dynamic_union& other ) const
+            {
+                if ( get_type () != other.get_type () )
+                {
+                    return false;
+                }
+                return operator_equals ( *this, other );
+            }
+
+        template < template < typename > class Type_description >
+            bool Dynamic_union < Type_description >::operator< ( const Dynamic_union& other ) const
+            {
+                if ( get_type () != other.get_type () )
+                {
+                    return get_type () < other.get_type ();
+                }
+                return operator_less ( *this, other );
+            }
+
+        template < template < typename > class Type_description >
+        template < typename T >
+            T Dynamic_union < Type_description >::get () const
+            {
+                check_type ( Type_description < T >::type_string );
+                return * ( ( T* ) value.get () );
+            }
+
+        template < template < typename > class Type_description >
+            void Dynamic_union < Type_description >::check_type ( std::string type ) const
+            {
+                 if ( get_type () != type )
+                 {
+                     throw std::logic_error ( "Cannot retrieve " + type +
+                             " from a Dynamic_union whose type is " + get_type () + "." );
+                 }
+            }
 
     } /* namespace types */
 } /* namespace engine */
