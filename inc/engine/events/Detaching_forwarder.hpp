@@ -33,7 +33,7 @@ namespace engine
     namespace events
     {
         template < typename Event_type >
-            class Detaching_forwarder : private Forwarder < Event_type >
+            class Detaching_forwarder : public Forwarder < Event_type >
             {
                 public:
                     Detaching_forwarder ( std::shared_ptr < Receiver < Event_type > > target );
